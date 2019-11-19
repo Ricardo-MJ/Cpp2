@@ -172,5 +172,27 @@ int main() {
 ## 10.42
 > 使用 list 代替 vector 重新实现10.2.3节中的去除重复单词的程序。
 ```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
+#include <iostream>
+#include <string>
+#include <list>
+void elimDups(std::list<std::string> &words)
+{
+    words.sort();
+    words.unique();
+}
+int main() {
+    std::list<std::string> words = {"the", "quick", "red", "fox", "jumps", "over", "the", "slow", "red", "turtle"};
+    elimDups(words);
+    for(auto i : words)
+        std::cout << i << ' ';
+    return 0;
+}
+```
+
+## 11.12
+> 编写程序，读入string和int的序列，将每个string和int存入一个pair 中，pair保存在一个vector中。
+```cpp
 
 ```
