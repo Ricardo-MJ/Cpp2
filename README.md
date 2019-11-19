@@ -150,5 +150,27 @@ int main() {
 ## 10.15
 > 编写一个 lambda ，捕获它所在函数的 int，并接受一个 int参数。lambda 应该返回捕获的 int 和 int 参数的和。
 ```cpp
+int a = 1;
+auto f = [a](int b) {return a + b;};
+```
+
+## 10.34
+> 使用 reverse_iterator 逆序打印一个vector。
+```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
+#include <iostream>
+#include <vector>
+int main() {
+    std::vector<int> v = {1, 2, 3, 4, 5};
+    for(auto p = v.crbegin(); p != v.crend(); p++)
+        std::cout << *p << ' ';
+    return 0;
+}
+```
+
+## 10.42
+> 使用 list 代替 vector 重新实现10.2.3节中的去除重复单词的程序。
+```cpp
 
 ```
