@@ -12,26 +12,29 @@ vector<int> vec(other_vec.begin(), other_vec.end());  // 与 other_vec 一样
 ## 9.20
 > 编写程序，从一个list<int>拷贝元素到两个deque中。值为偶数的所有元素都拷贝到一个deque中，而奇数值元素都拷贝到另一个deque中。
 ```CPP
-   #include <iostream>
-  #include <deque>
-  #include <list>
-  int main()
-  {
-      std::list<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-      std::deque<int> deque_jishu, deque_oushu;
-      for(auto i : list1)
-          if(i % 2 == 0)
-              deque_oushu.push_back(i);
-          else
-              deque_jishu.push_back(i);
-      for(auto i : deque_oushu)
-          std::cout << i << ' ';
-      std::cout << '\n';
-      for(auto i : deque_jishu)
-          std::cout << i << ' ';
-      return 0;
-  }
+/*Copyright [2019] <Copyright MrM>
+*/
+#include <iostream>
+#include <deque>
+#include <list>
+int main()
+{
+std::list<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+std::deque<int> deque_jishu, deque_oushu;
+for(auto i : list1)
+  if(i % 2 == 0)
+      deque_oushu.push_back(i);
+  else
+      deque_jishu.push_back(i);
+for(auto i : deque_oushu)
+  std::cout << i << ' ';
+std::cout << '\n';
+for(auto i : deque_jishu)
+  std::cout << i << ' ';
+return 0;
+}
 ```
+	
 ## 9.29
 > 假定vec包含25个元素，那么vec.resize(100)会做什么？如果接下来调用vec.resize(10)会做什么？
 * 将75个值为0的元素添加到vec的末尾
@@ -40,6 +43,8 @@ vector<int> vec(other_vec.begin(), other_vec.end());  // 与 other_vec 一样
 ## 9.43
 > 编写一个函数，接受三个string参数是s、oldVal 和newVal。使用迭代器及insert和erase函数将s中所有oldVal替换为newVal。测试你的程序，用它替换通用的简写形式，如，将"tho"替换为"though",将"thru"替换为"through"。
 ```CPP
+/*Copyright [2019] <Copyright MrM>
+*/
 #include <iostream>
 #include <string>
 void f(std::string& s, std::string oldVal, std::string newVal)
@@ -72,6 +77,8 @@ int main()
 ## 9.52
 > 使用stack处理括号化的表达式。当你看到一个左括号，将其记录下来。当你在一个左括号之后看到一个右括号，从stack中pop对象，直至遇到左括号，将左括号也一起弹出栈。然后将一个值（括号内的运算结果）push到栈中，表示一个括号化的（子）表达式已经处理完毕，被其运算结果所替代。
 ```CPP
+/*Copyright [2019] <Copyright MrM>
+*/
 #include<iostream>
 #include<stack>
 #include<string>
@@ -127,3 +134,21 @@ int main()
 }
 ```
 ## 10.3
+> 用accumulate求一个 vector 中元素之和。
+```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
+#include <iostream>
+#include <vector>
+#include <numeric>
+int main() {
+    std::vector<int> v = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    std::cout << std::accumulate(v.begin(), v.end(), 0) << std::endl;
+    return 0;
+}
+```
+## 10.15
+> 编写一个 lambda ，捕获它所在函数的 int，并接受一个 int参数。lambda 应该返回捕获的 int 和 int 参数的和。
+```cpp
+
+```
