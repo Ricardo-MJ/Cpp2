@@ -193,5 +193,37 @@ int main() {
 ## 11.12
 > 编写程序，读入string和int的序列，将每个string和int存入一个pair 中，pair保存在一个vector中。
 ```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
+#include <vector>
+#include <utility>
+#include <string>
+#include <iostream>
+int main()
+{
+	std::vector<std::pair<std::string, int>> v;
+	std::string s;
+	int x;
+	while(std::cin >> s >> x)
+        v.push_back(std::pair<std::string, int>(s, x));
+    for(auto i : v)
+        std::cout << i.first << ":" << i.second << std::endl;
+}
+```
+## 11.17
+> 假定 c 是一个string的multiset，v 是一个string 的vector，解释下面的调用。指出每个调用是否合法：
+```cpp
+copy(v.begin(), v.end(), inserter(c, c.end()));
+copy(v.begin(), v.end(), back_inserter(c));
+copy(c.begin(), c.end(), inserter(v, v.end()));
+copy(c.begin(), c.end(), back_inserter(v));
+```
+copy(v.begin(), v.end(), back_inserter(c));这个调用不合法,因为multiset 没有 push_back 方法, 所以也不能使用back_inserter。
+其他三个都合法。
+
+## 11.38
+> 用 unordered_map 重写单词计数程序和单词转换程序。
+```cpp
 
 ```
+
