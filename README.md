@@ -82,35 +82,34 @@ int main()
 #include<iostream>
 #include<stack>
 #include<string>
-using namespace std;
 
-string ji_suan(string l, string op, string r)
+std::string ji_suan(std::string l, std::string op, std::string r)
 {
-	string s;
+	std::string s;
 	if (op == "-")
-		s = to_string(stoi(l) - stoi(r));
+		s = std::to_string(stoi(l) - stoi(r));
     else if (op == "+")
-		s = to_string(stoi(l) + stoi(r));
+		s = std::to_string(stoi(l) + stoi(r));
     else if (op == "*")
-		s = to_string(stoi(l) * stoi(r));
+		s = std::to_string(stoi(l) * stoi(r));
     else if (op == "/")
-		s = to_string(stoi(l) / stoi(r));
+		s = std::to_string(stoi(l) / stoi(r));
 	return s;
 }
 
 int main()
 {
-    string s("1+2+3*(3*3)");
-    stack<string> stack1;
+    std::string s("1+2+3*(3*3)");
+    std::stack<std::string> stack1;
     for(auto i = s.begin(); i != s.end(); )
     {
         if(*i == '(')
         {
-            stack1.push(string(1, *i));
+            stack1.push(std::string(1, *i));
             i++;
             while(*i != ')')
             {
-                stack1.push(string(1, *i));
+                stack1.push(std::string(1, *i));
                 i++;
             }
         }
@@ -128,7 +127,7 @@ int main()
         else
             i++;
     }
-    cout << stack1.top();
+    std::cout << stack1.top();
     stack1.pop();
     return 0;
 }
