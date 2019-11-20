@@ -349,3 +349,28 @@ int main()
     return 0;
 }
 ```
+
+## 13.46
+> 什么类型的引用可以绑定到下面的初始化器上？
+```cpp
+int f();
+vector<int> vi(100);
+int? r1 = f();
+int? r2 = vi[0];
+int? r3 = r1;
+int? r4 = vi[0] * f();
+```
+```cpp
+int f();
+vector<int> vi(100);
+int&& r1 = f();
+int& r2 = vi[0];
+int& r3 = r1;
+int&& r4 = vi[0] * f();
+```
+
+## 13.49
+> 为你的 StrVec、String 和 Message 类添加一个移动构造函数和一个移动赋值运算符。
+```cpp
+
+```
