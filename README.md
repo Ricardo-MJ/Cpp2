@@ -295,3 +295,57 @@ int main()
 }
 ```
 
+## 13.12
+> 在下面的代码片段中会发生几次析构函数的调用
+```cpp
+bool fcn(const Sales_data *trans, Sales_data accum)
+{
+	Sales_data item1(*trans), item2(accum);
+	return item1.isbn() != item2.isbn();
+}
+```
+三次, accum、item1和item2各一次。
+
+## 13.18
+> 定义一个 Employee 类，它包含雇员的姓名和唯一的雇员证号。为这个类定义默认构造函数，以及接受一个表示雇员姓名的 string 的构造函数。每个构造函数应该通过递增一个 static 数据成员来生成一个唯一的证号。
+```cpp
+#include <iostream>
+#include <string>
+static int n = 1;
+class Employee
+{
+public:
+    Employee();
+    Employee(std::string name);
+
+private:
+    std::string name_;
+	int num_;
+	int id;
+};
+
+Employee::Employee()
+{
+    name_ = "Bob";
+    id = n;
+    n++;
+    std::cout << name_ << std::endl;
+    std::cout << id << std::endl;
+}
+
+Employee::Employee(std::string name)
+{
+    name_ = name;
+    id = n;
+    n++;
+    std::cout << name_ << std::endl;
+    std::cout << id << std::endl;
+}
+
+int main()
+{
+    Employee member1;
+    Employee("Jack");
+    return 0;
+}
+```
