@@ -309,43 +309,43 @@ bool fcn(const Sales_data *trans, Sales_data accum)
 ## 13.18
 > 定义一个 Employee 类，它包含雇员的姓名和唯一的雇员证号。为这个类定义默认构造函数，以及接受一个表示雇员姓名的 string 的构造函数。每个构造函数应该通过递增一个 static 数据成员来生成一个唯一的证号。
 ```cpp
-#include <iostream>
-#include <string>
-static int n = 1;
+/*Copyright [2019] <Copyright MrM>
+*/
+#include<iostream>
+#include<string>
+
 class Employee
 {
 public:
     Employee();
     Employee(std::string name);
-
+    static int n;
 private:
-    std::string name_;
-	int num_;
-	int id;
+    std::string m_name;
+    int m_num;
 };
 
 Employee::Employee()
 {
-    name_ = "Bob";
-    id = n;
-    n++;
-    std::cout << name_ << std::endl;
-    std::cout << id << std::endl;
+    m_name = "Alice";
+    m_num = n++;
+    std::cout << m_name << ' ' << m_num << std::endl;
 }
 
 Employee::Employee(std::string name)
 {
-    name_ = name;
-    id = n;
-    n++;
-    std::cout << name_ << std::endl;
-    std::cout << id << std::endl;
+    m_name = name;
+    m_num = n++;
+    std::cout << m_name << ' ' << m_num << std::endl;
 }
+
+int Employee::n = 1;
 
 int main()
 {
-    Employee member1;
-    Employee("Jack");
+    Employee mem1;
+    Employee mem2("Bob");
+    Employee mem3("Eric");
     return 0;
 }
 ```
