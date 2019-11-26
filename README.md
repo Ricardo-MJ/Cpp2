@@ -474,3 +474,171 @@ void StrVec::reallocate()
 StrVec::StrVec(StrVec &&s) noexcept: elements(s.elements), first_free(s.first_free), cap(s.cap)
     {s.elements = s.first_free = s.cap = nullptr;}
 ```
+
+## 13.58
+> 编写新版本的 Foo 类，其 sorted 函数中有打印语句，测试这个类，来验证你对前两题的答案是否正确。
+```cpp
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
+using std::vector; using std::sort;
+
+class Foo
+{
+public:
+	Foo sorted() && ;
+	Foo sorted() const &;
+private:
+	vector<int> data;
+};
+
+Foo Foo::sorted() && {
+	sort(data.begin(), data.end());
+	std::cout << "&&" << std::endl; // debug
+	return *this;
+}
+
+Foo Foo::sorted() const &
+{
+	//    Foo ret(*this);
+	//    sort(ret.data.begin(), ret.data.end());
+	//    return ret;
+
+	std::cout << "const &" << std::endl; // debug
+
+	//    Foo ret(*this);
+	//    ret.sorted();     // Exercise 13.56
+	//    return ret;
+
+	return Foo(*this).sorted(); // Exercise 13.57
+}
+
+int main()
+{
+	Foo().sorted(); // call "&&"
+	Foo f;
+	f.sorted(); // call "const &"
+}
+```
+
+## 14.3
+> string 和 vector 都定义了重载的==以比较各自的对象，假设 svec1 和 svec2 是存放 string 的 vector，确定在下面的表达式中分别使用了哪个版本的==？
+```cpp
+(a) "cobble" == "stone"
+(b) svec1[0] == svec2[0]
+(c) svec1 == svec2
+(d) "svec1[0] == "stone"
+```
+* (a)都不是
+* (b)string
+* (c)vector
+* (d)string
+
+## 14.20
+> 为你的 Sales_data 类定义加法和复合赋值运算符。
+```cpp
+#include <string>
+#include <iostream>
+
+class Sales_data
+{
+	friend std::istream& operator>>(std::istream&, Sales_data&);
+	friend std::ostream& operator<<(std::ostream&, const Sales_data&);
+	friend Sales_data operator+(const Sales_data&, const Sales_data&);
+
+public:
+	Sales_data(const std::string &s, unsigned n, double p) :bookNo(s), units_sold(n), revenue(n*p) {}
+	Sales_data() : Sales_data("", 0, 0.0f) {}
+	Sales_data(const std::string &s) : Sales_data(s, 0, 0.0f) {}
+	Sales_data(std::istream &is);
+
+	Sales_data& operator=(const std::string&);
+
+	Sales_data& operator+=(const Sales_data&);
+	std::string isbn() const { return bookNo; }
+
+private:
+	inline double avg_price() const;
+
+	std::string bookNo; //书本编号
+	unsigned units_sold = 0; //某本书总共销售了多少本
+	double revenue = 0.0; //某本书的总销售额
+};
+
+std::istream& operator>>(std::istream&, Sales_data&);
+std::ostream& operator<<(std::ostream&, const Sales_data&);
+Sales_data operator+(const Sales_data&, const Sales_data&);
+
+inline double Sales_data::avg_price() const
+{
+	return units_sold ? revenue / units_sold : 0;
+}
+
+
+Sales_data::Sales_data(std::istream &is) : Sales_data()
+{
+	is >> *this;
+}
+
+Sales_data operator+(const Sales_data &lhs, const Sales_data &rhs) //加法运算符
+{
+	Sales_data sum = lhs;
+	sum += rhs;
+	return sum;
+}
+
+Sales_data& Sales_data::operator+=(const Sales_data &rhs) //复合赋值运算符
+{
+	units_sold += rhs.units_sold;
+	revenue += rhs.revenue;
+	return *this;
+}
+
+
+std::istream& operator>>(std::istream &is, Sales_data &item)
+{
+	double price = 0.0;
+	is >> item.bookNo >> item.units_sold >> price;
+	if (is)
+		item.revenue = price * item.units_sold;
+	else
+		item = Sales_data();
+	return is;
+}
+
+std::ostream& operator<<(std::ostream &os, const Sales_data &item)
+{
+	os << item.isbn() << " " << item.units_sold << " " << item.revenue << " " << item.avg_price();
+	return os;
+}
+
+
+
+Sales_data& Sales_data::operator=(const std::string &isbn)
+{
+	*this = Sales_data(isbn);
+	return *this;
+}
+
+int main()
+{
+    //sij表示i号书第j次销售的情况；
+	Sales_data s11("1", 3, 20); //1号书卖了3本，每本单价20元
+	Sales_data s12("1", 5, 20);
+	Sales_data s1;
+	s1 = s12 + s11; //加号运算符
+	std::cout << "s1 = " << s1 << std::endl;
+
+    std::cout << "s11 = " << s11 << std::endl;
+    s11 += s12;
+    std::cout << "新s11 = " <<  s11 << std::endl;
+	return 0;
+}
+```
+
+## 14.38
+> 编写一个类令其检查某个给定的 string 对象的长度是否与一个阈值相等。使用该对象编写程序，统计并报告在输入的文件中长度为1的单词有多少个，长度为2的单词有多少个、......、长度为10的单词有多少个。
+```cpp
+
+```
