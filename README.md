@@ -475,10 +475,12 @@ void StrVec::reallocate()
 StrVec::StrVec(StrVec &&s) noexcept: elements(s.elements), first_free(s.first_free), cap(s.cap)
     {s.elements = s.first_free = s.cap = nullptr;}
 ```
+
 * String类
 ```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
 #include <memory>
-
 class String {
 public:
     String() : String("") {}
@@ -723,8 +725,6 @@ void Message::move_Folders(Message* m)
     m->folders.clear();
 }
 
-// Folder Implementation
-
 void swap(Folder& lhs, Folder& rhs)
 {
     using std::swap;
@@ -799,6 +799,8 @@ void Folder::move_Messages(Folder* f)
 ## 13.58
 > 编写新版本的 Foo 类，其 sorted 函数中有打印语句，测试这个类，来验证你对前两题的答案是否正确。
 ```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -859,6 +861,8 @@ int main()
 ## 14.20
 > 为你的 Sales_data 类定义加法和复合赋值运算符。
 ```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
 #include <string>
 #include <iostream>
 
@@ -961,9 +965,9 @@ int main()
 ## 14.38
 > 编写一个类令其检查某个给定的 string 对象的长度是否与一个阈值相等。使用该对象编写程序，统计并报告在输入的文件中长度为1的单词有多少个，长度为2的单词有多少个、......、长度为10的单词有多少个。
 ```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
 #include <iostream>
-#include <vector>
-#include <algorithm>
 #include <string>
 #include <fstream>
 
