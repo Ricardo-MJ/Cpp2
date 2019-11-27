@@ -642,3 +642,18 @@ int main()
 ```cpp
 
 ```
+
+## 14.52
+> 在下面的加法表达式中分别选用了哪个operator+？列出候选函数、可行函数及为每个可行函数的实参执行的类型转换：
+```cpp
+struct Longdouble {
+	//用于演示的成员operator+;在通常情况下是个非成员
+	LongDouble operator+(const SmallInt&);
+	//其他成员与14.9.2节一致
+};
+LongDouble operator+(LongDouble&, double);
+SmallInt si;
+LongDouble ld;
+ld = si + ld;
+ld = ld + si;
+```
