@@ -1049,3 +1049,131 @@ LongDouble ld;
 ld = si + ld;
 ld = ld + si;
 ```
+* ld = si + ld; 调用不合法
+* ld = ld + si; 两个都可以调用
+
+## 15.12
+> 有必要将一个成员函数同时声明成 override 和 final 吗？为什么？
+有必要。override 的含义是重写基类中相同名称的虚函数，final 是阻止它的派生类重写当前虚函数。
+
+## 15.16
+> 改写你在15.2.2节练习中编写的数量受限的折扣策略，令其继承 Disc_quote。
+```cpp
+class Disc_quote : public Quote
+{
+public:
+	Disc_quote();
+	Disc_quote(const std::string& b, double p, std::size_t q, double d) :
+		Quote(b, p), quantity(q), discount(d)
+	{}
+
+	virtual double net_price(std::size_t n) const override = 0;
+
+protected:
+	std::size_t quantity;
+	double      discount;
+};
+
+class Limit_quote : public Disc_quote
+{
+public:
+	Limit_quote() = default;
+	Limit_quote(const std::string& b, double p, std::size_t max, double disc) :
+		Disc_quote(b, p, max, disc)
+	{}
+
+	double net_price(std::size_t n) const override
+	{
+		return n * price * (n < quantity ? 1 - discount : 1);
+	}
+
+};
+```
+
+## 15.30
+> 编写你自己的 Basket 类，用它计算上一个练习中交易记录的总价格。
+```cpp
+#include "quote.h"
+#include <set>
+#include <memory>
+
+class Basket
+{
+public:
+	// copy verison
+	void add_item(const Quote& sale)
+	{
+		items.insert(std::shared_ptr<Quote>(sale.clone()));
+	}
+	// move version
+	void add_item(Quote&& sale)
+	{
+		items.insert(std::shared_ptr<Quote>(std::move(sale).clone()));
+	}
+
+	double total_receipt(std::ostream& os) const;
+
+private:
+
+	// function to compare needed by the multiset member
+	static bool compare(const std::shared_ptr<Quote>& lhs,
+		const std::shared_ptr<Quote>& rhs)
+	{
+		return lhs->isbn() < rhs->isbn();
+	}
+
+	// hold multiple quotes, ordered by the compare member
+	std::multiset<std::shared_ptr<Quote>, decltype(compare)*>
+		items{ compare };
+};
+
+double Basket::total_receipt(std::ostream &os) const
+{
+	double sum = 0.0;
+
+	for (auto iter = items.cbegin(); iter != items.cend();
+		iter = items.upper_bound(*iter))
+		//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		// @note   this increment moves iter to the first element with key
+		//         greater than  *iter.
+
+	{
+		sum += print_total(os, **iter, items.count(*iter));
+	}                                   // ^^^^^^^^^^^^^ using count to fetch
+	// the number of the same book.
+	os << "Total Sale: " << sum << std::endl;
+	return sum;
+}
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
+#include <fstream>
+
+#include "quote.h"
+#include "bulk_quote.h"
+#include "limit_quote.h"
+#include "disc_quote.h"
+#include "basket.h"
+
+
+int main()
+{
+	Basket basket;
+
+	for (unsigned i = 0; i != 10; ++i)
+		basket.add_item(Bulk_quote("Bible", 20.6, 20, 0.3));
+
+	for (unsigned i = 0; i != 10; ++i)
+		basket.add_item(Bulk_quote("C++Primer", 30.9, 5, 0.4));
+
+	for (unsigned i = 0; i != 10; ++i)
+		basket.add_item(Quote("CLRS", 40.1));
+
+	std::ofstream log("log.txt", std::ios_base::app | std::ios_base::out);
+
+	basket.total_receipt(log);
+	return 0;
+}
+```
