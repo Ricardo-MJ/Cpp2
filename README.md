@@ -371,6 +371,7 @@ int&& r4 = vi[0] * f();
 
 ## 13.49
 > 为你的 StrVec、String 和 Message 类添加一个移动构造函数和一个移动赋值运算符。
+* StrVec类
 ```cpp
 /*Copyright [2019] <Copyright MrM>
 */
@@ -473,6 +474,326 @@ void StrVec::reallocate()
 
 StrVec::StrVec(StrVec &&s) noexcept: elements(s.elements), first_free(s.first_free), cap(s.cap)
     {s.elements = s.first_free = s.cap = nullptr;}
+```
+* String类
+```cpp
+#include <memory>
+
+class String {
+public:
+    String() : String("") {}
+    String(const char*);
+    String(const String&);
+    String& operator=(const String&);
+    String(String&&) noexcept;
+    String& operator=(String&&) noexcept;
+    ~String();
+
+    const char* c_str() const { return elements; }
+    size_t size() const { return end - elements; }
+    size_t length() const { return end - elements - 1; }
+
+private:
+    std::pair<char*, char*> alloc_n_copy(const char*, const char*);
+    void range_initializer(const char*, const char*);
+    void free();
+
+private:
+    char* elements;
+    char* end;
+    std::allocator<char> alloc;
+};
+
+#include <algorithm>
+
+std::pair<char*, char*> String::alloc_n_copy(const char* b, const char* e)
+{
+    auto str = alloc.allocate(e - b);
+    return {str, std::uninitialized_copy(b, e, str)};
+}
+
+void String::range_initializer(const char* first, const char* last)
+{
+    auto newstr = alloc_n_copy(first, last);
+    elements = newstr.first;
+    end = newstr.second;
+}
+
+String::String(const char* s)
+{
+    char* sl = const_cast<char*>(s);
+    while (*sl) ++sl;
+    range_initializer(s, ++sl);
+}
+
+String::String(const String& rhs)
+{
+    range_initializer(rhs.elements, rhs.end);
+}
+
+void String::free()
+{
+    if (elements) {
+        std::for_each(elements, end, [this](char& c) { alloc.destroy(&c); });
+        alloc.deallocate(elements, end - elements);
+    }
+}
+
+String::~String()
+{
+    free();
+}
+
+String& String::operator=(const String& rhs)
+{
+    auto newstr = alloc_n_copy(rhs.elements, rhs.end);
+    free();
+    elements = newstr.first;
+    end = newstr.second;
+    return *this;
+}
+
+String::String(String&& s) noexcept : elements(s.elements), end(s.end)
+{
+    s.elements = s.end = nullptr;
+}
+
+String& String::operator=(String&& rhs) noexcept
+{
+    if (this != &rhs) {
+        free();
+        elements = rhs.elements;
+        end = rhs.end;
+        rhs.elements = rhs.end = nullptr;
+    }
+    return *this;
+}
+```
+
+* Message类
+```cpp
+/*Copyright [2019] <Copyright MrM>
+*/
+#include <set>
+#include <string>
+#include <iostream>
+class Folder;
+
+class Message {
+    friend void swap(Message&, Message&);
+    friend void swap(Folder&, Folder&);
+    friend class Folder;
+
+public:
+    explicit Message(const std::string& str = "") : contents(str) {}
+    Message(const Message&);
+    Message& operator=(const Message&);
+    Message(Message&&);
+    Message& operator=(Message&&);
+    ~Message();
+    void save(Folder&);
+    void remove(Folder&);
+
+    void print_debug();
+
+private:
+    std::string contents;
+    std::set<Folder*> folders;
+
+    void add_to_Folders(const Message&);
+    void remove_from_Folders();
+    void move_Folders(Message*);
+
+    void addFldr(Folder* f) { folders.insert(f); }
+    void remFldr(Folder* f) { folders.erase(f); }
+};
+
+void swap(Message&, Message&);
+
+class Folder {
+    friend void swap(Message&, Message&);
+    friend void swap(Folder&, Folder&);
+    friend class Message;
+
+public:
+    Folder() = default;
+    Folder(const Folder&);
+    Folder& operator=(const Folder&);
+    Folder(Folder&&);
+    Folder& operator=(Folder&&);
+    ~Folder();
+
+    void print_debug();
+
+private:
+    std::set<Message*> msgs;
+
+    void add_to_Messages(const Folder&);
+    void remove_from_Messages();
+    void move_Messages(Folder*);
+
+    void addMsg(Message* m) { msgs.insert(m); }
+    void remMsg(Message* m) { msgs.erase(m); }
+};
+
+void swap(Folder&, Folder&);
+
+void swap(Message& lhs, Message& rhs)
+{
+    using std::swap;
+    lhs.remove_from_Folders();
+    rhs.remove_from_Folders();
+
+    swap(lhs.folders, rhs.folders);
+    swap(lhs.contents, rhs.contents);
+
+    lhs.add_to_Folders(lhs);
+    rhs.add_to_Folders(rhs);
+}
+
+
+Message::Message(const Message& m) : contents(m.contents), folders(m.folders)
+{
+    add_to_Folders(m);
+}
+
+Message& Message::operator=(const Message& rhs)
+{
+    remove_from_Folders();
+    contents = rhs.contents;
+    folders = rhs.folders;
+    add_to_Folders(rhs);
+    return *this;
+}
+
+Message::Message(Message&& m) : contents(std::move(m.contents))
+{
+    move_Folders(&m);
+}
+
+Message& Message::operator=(Message&& rhs)
+{
+    if (this != &rhs) {
+        remove_from_Folders();
+        contents = std::move(rhs.contents);
+        move_Folders(&rhs);
+    }
+    return *this;
+}
+
+Message::~Message()
+{
+    remove_from_Folders();
+}
+
+void Message::save(Folder& f)
+{
+    addFldr(&f);
+    f.addMsg(this);
+}
+
+void Message::remove(Folder& f)
+{
+    remFldr(&f);
+    f.remMsg(this);
+}
+
+void Message::print_debug()
+{
+    std::cout << contents << std::endl;
+}
+
+void Message::add_to_Folders(const Message& m)
+{
+    for (auto f : m.folders) f->addMsg(this);
+}
+
+void Message::remove_from_Folders()
+{
+    for (auto f : folders) f->remMsg(this);
+}
+
+void Message::move_Folders(Message* m)
+{
+    folders = std::move(m->folders);
+    for (auto f : folders) {
+        f->remMsg(m);
+        f->addMsg(this);
+    }
+    m->folders.clear();
+}
+
+// Folder Implementation
+
+void swap(Folder& lhs, Folder& rhs)
+{
+    using std::swap;
+    lhs.remove_from_Messages();
+    rhs.remove_from_Messages();
+
+    swap(lhs.msgs, rhs.msgs);
+
+    lhs.add_to_Messages(lhs);
+    rhs.add_to_Messages(rhs);
+}
+
+Folder::Folder(const Folder& f) : msgs(f.msgs)
+{
+    add_to_Messages(f);
+}
+
+Folder& Folder::operator=(const Folder& rhs)
+{
+    remove_from_Messages();
+    msgs = rhs.msgs;
+    add_to_Messages(rhs);
+    return *this;
+}
+
+Folder::Folder(Folder&& f)
+{
+    move_Messages(&f);
+}
+
+Folder& Folder::operator=(Folder&& f)
+{
+    if (this != &f) {
+        remove_from_Messages();
+        move_Messages(&f);
+    }
+    return *this;
+}
+
+Folder::~Folder()
+{
+    remove_from_Messages();
+}
+
+void Folder::print_debug()
+{
+    for (auto m : msgs) std::cout << m->contents << " ";
+    std::cout << std::endl;
+}
+
+void Folder::add_to_Messages(const Folder& f)
+{
+    for (auto m : f.msgs) m->addFldr(this);
+}
+
+void Folder::remove_from_Messages()
+{
+    for (auto m : msgs) m->remFldr(this);
+}
+
+void Folder::move_Messages(Folder* f)
+{
+    msgs = std::move(f->msgs);
+    for (auto m : msgs) {
+        m->remFldr(f);
+        m->addFldr(this);
+    }
+    f->msgs.clear();
+}
 ```
 
 ## 13.58
@@ -640,7 +961,74 @@ int main()
 ## 14.38
 > 编写一个类令其检查某个给定的 string 对象的长度是否与一个阈值相等。使用该对象编写程序，统计并报告在输入的文件中长度为1的单词有多少个，长度为2的单词有多少个、......、长度为10的单词有多少个。
 ```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <fstream>
 
+class BoundTest {
+public:
+    BoundTest(std::size_t l) : lenth(l){}
+    bool operator()(const std::string& s)
+    {
+        return s.length() == lenth;
+    }
+
+//private:
+    std::size_t lenth;
+};
+
+int main()
+{
+    std::ifstream fin("E:\\111.txt");
+    size_t l1, l2, l3, l4, l5, l6, l7, l8, l9, l10;
+    l1 = l2 = l3 = l4 = l5 = l6 = l7 = l8 = l9 = l10 = 0;
+    BoundTest test1(1);
+    BoundTest test2(2);
+    BoundTest test3(3);
+    BoundTest test4(4);
+    BoundTest test5(5);
+    BoundTest test6(6);
+    BoundTest test7(7);
+    BoundTest test8(8);
+    BoundTest test9(9);
+    BoundTest test10(10);
+
+    for (std::string word; fin >> word; ) {
+        if (test1(word))
+            l1++;
+        else if (test2(word))
+            l2++;
+        else if (test3(word))
+            l3++;
+        else if (test4(word))
+            l4++;
+        else if (test5(word))
+            l5++;
+        else if (test6(word))
+            l6++;
+        else if (test7(word))
+            l7++;
+        else if (test8(word))
+            l8++;
+        else if (test9(word))
+            l9++;
+        else if (test10(word))
+            l10++;
+    }
+    std::cout << "There is/are " << l1 << "words of length equal to 1" << std::endl;
+    std::cout << "There is/are " << l2 << "words of length equal to 2" << std::endl;
+    std::cout << "There is/are " << l3 << "words of length equal to 3" << std::endl;
+    std::cout << "There is/are " << l4 << "words of length equal to 4" << std::endl;
+    std::cout << "There is/are " << l5 << "words of length equal to 5" << std::endl;
+    std::cout << "There is/are " << l6 << "words of length equal to 6" << std::endl;
+    std::cout << "There is/are " << l7 << "words of length equal to 7" << std::endl;
+    std::cout << "There is/are " << l8 << "words of length equal to 8" << std::endl;
+    std::cout << "There is/are " << l9 << "words of length equal to 9" << std::endl;
+    std::cout << "There is/are " << l10 << "words of length equal to 10" << std::endl;
+    return 0;
+}
 ```
 
 ## 14.52
